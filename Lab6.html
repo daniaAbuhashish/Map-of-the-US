@@ -1,0 +1,52 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Leaflet Map with Random Coordinates</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <style>
+            #map { height: 400px; }
+        </style>
+    </head>
+    <body>
+        <h1>Map of The US</h1>
+        <div id="map"></div>
+        <div id="marker-info">
+            <p id="marker1">Marker 1 (Randomly Generated Coordinates Point 1):</p>
+            <p id="marker2">Marker 2 (Randomly Generated Coordinates Point 2):</p>
+            <p id="marker3">Marker 3 (Randomly Generated Coordinates Point 3):</p>
+        </div>
+    
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+            var map = L.map('map').setView([37.7749, -122.4194], 5);
+    
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+    
+            function getRandomInRange(from, to, fixed) {
+                return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
+            }
+    
+            var coordinates = [];
+            for (var i = 0; i < 3; i++) {
+                var latitude = getRandomInRange(30, 35, 3);
+                var longitude = getRandomInRange(-100, -90, 3);
+                coordinates.push([latitude, longitude]);
+            }
+    
+            for (var i = 0; i < coordinates.length; i++) {
+                var marker = L.marker(coordinates[i]).addTo(map);
+                marker.bindPopup('Marker ' + (i + 1)).openPopup();
+    
+                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coordinates[i][0]}&longitude=${coordinates[i][1]}&localityLanguage=en`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('marker' + (i + 1)).innerHTML += ' ' + data.locality;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        </script>
+    </body>
+    </html>
